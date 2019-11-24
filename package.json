@@ -1,0 +1,22 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "Bamazon homework",
+  "main": "bamazonCustomer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeroalva/bamazon.git"
+  },
+  "author": "Jeronimo Alvarez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jeroalva/bamazon/issues"
+  },
+  "homepage": "https://github.com/jeroalva/bamazon#readme",
+  "dependencies": {
+    "console.table": "^0.10.0"
+  }
+}
