@@ -1,6 +1,10 @@
 var mysql = require("mysql");
 const cTable = require('console.table');
 var inquirer = require("inquirer");
+var arrayItems = [];
+var parsedArrayItems = [];
+var arrayDepartments = [];
+var parsedArrayDepartments = [];
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -15,7 +19,7 @@ connection.connect(function(err) {
   console.log("connected as id " + connection.threadId + "\n");
     // displayAll();
     // buyProduct("Cofee Mug",3);
-    inquireFunction();
+    allItems();
 });
 
 var displayAll = function(){
@@ -25,7 +29,7 @@ var displayAll = function(){
         function(err,res){
             if (err) throw err;
             console.table(res);
-            inquireFunction();
+            allDepartments(parsedArrayItems);
         }
     );
 }
@@ -36,7 +40,36 @@ var lowInventory = function(){
         function(err,res){
             if (err) throw err;
             console.table(res);
-            inquireFunction();
+            allDepartments(parsedArrayItems);
+        }
+    );
+}
+
+var allItems = function(){
+    connection.query(
+        "SELECT product_name FROM products",
+        function(err,res){
+            if (err) throw err;
+            // console.table(res);
+            arrayItems = res;
+            for (let i=0;i<arrayItems.length;i++){
+                parsedArrayItems.push(arrayItems[i].product_name)
+            }
+            allDepartments(parsedArrayItems);
+        }
+    );
+}
+
+var allDepartments = function(parsedArrayItems){
+    connection.query(
+        "SELECT DISTINCT department_name FROM products",
+        function(err,res){
+            if (err) throw err;
+            arrayDepartments = res;
+            for (let i=0;i<arrayDepartments.length;i++){
+                parsedArrayDepartments.push(arrayDepartments[i].department_name)
+            }
+            inquireFunction(parsedArrayItems,parsedArrayDepartments);
         }
     );
 }
@@ -53,7 +86,7 @@ function updateProduct(productName,qtyToAdd) {
                   console.log(res.affectedRows + " products updated!\n");
                 }
               );
-            inquireFunction();
+            allItems();
         }
     );
   }
@@ -71,12 +104,12 @@ function updateProduct(productName,qtyToAdd) {
       function(err, res) {
         if (err) throw err;
         console.log(res.affectedRows + " product inserted!\n");
-        inquireFunction();
+        allItems();
       }
     );
   }
 
-var inquireFunction = function(){
+var inquireFunction = function(parsedArrayItems,parsedArrayDepartments){
     inquirer
     .prompt([
         {
@@ -94,7 +127,7 @@ var inquireFunction = function(){
     ]).then(function(data){
         switch(data.whatToDo){
             case "View Products for Sale":
-                displayAll();;
+                displayAll();
                 break;
             case "View Low Inventory":
                 lowInventory();
@@ -103,8 +136,10 @@ var inquireFunction = function(){
                 inquirer
                 .prompt([
                     {
+                        type: "list",
                         name: "productToUpdate",
-                        message: "What's the name of the product that you'd like to update: "
+                        message: "What's the name of the product that you'd like to update: ",
+                        choices: parsedArrayItems
                     },
                     {
                         name: "quantityToAdd",
@@ -122,8 +157,10 @@ var inquireFunction = function(){
                         message: "What is the name of the product that you want to add?"
                     },
                     {
+                        type: "list",
                         name: "departmentOfProduct",
-                        message: "What is the name of the department that the product belongs to?"
+                        message: "What department do you want to add it to?",
+                        choices: parsedArrayDepartments
                     },
                     {
                         name: "priceOfProduct",
